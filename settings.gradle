@@ -1,0 +1,42 @@
+rootProject.name = 'h2o-3'
+
+include 'h2o-core'
+include 'h2o-algos'
+include 'h2o-web'
+include 'h2o-app'
+include 'h2o-scala'
+include 'h2o-r'
+include 'h2o-py'
+include 'h2o-assembly'
+include 'h2o-persist-hdfs'
+include 'h2o-docs'
+include 'h2o-hadoop:h2o-mapreduce-generic'
+include 'h2o-hadoop:h2o-yarn-generic'
+include 'h2o-genmodel'
+include 'h2o-java-rest-bindings'
+
+if (System.getProperty("user.name").equals("jenkins") 
+    || System.getenv("BUILD_HADOOP") != null
+    || System.getenv("H2O_TARGET") != null) {
+
+  // Default hadoop build targets
+  def allTargets = [
+          "cdh5.2", "cdh5.3", "cdh5.4.2",
+          "hdp2.1", "hdp2.2", "hdp2.3",
+          "mapr3.1.1", "mapr4.0.1", "mapr5.0"
+          ]
+  // Compute targets
+  def targets = System.getenv("H2O_TARGET") != null ? System.getenv("H2O_TARGET").split(",").collect { it.trim() } : allTargets
+  // Include selected/all Hadoop targets
+  if (System.getenv("BUILD_HADOOP") != "false") {
+    targets.each { name ->
+      include "h2o-hadoop:h2o-${name}"
+      include "h2o-hadoop:h2o-${name}-assembly"
+
+    }
+  }
+}
+
+include 'h2o-test-integ'
+include 'h2o-test-accuracy'
+
